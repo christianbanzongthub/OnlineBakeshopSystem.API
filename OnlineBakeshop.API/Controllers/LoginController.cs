@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OnlineBakeshop.API.IRepository;
+using OnlineBakeshop.API.Model;
 
 namespace OnlineBakeshop.API.Controllers
 {
@@ -14,12 +15,13 @@ namespace OnlineBakeshop.API.Controllers
         }
 
 
-        [HttpGet]
-        public async Task<IActionResult> LoginStudent(@object login)
+        [HttpPost]
+        [Route("UserLogin")]
+        public async Task<IActionResult> UserLogin(LoginModel login)
         {
-            @object model = new @object();
-            var response = loginRepository.GetLogin(login.Username, login.Password);
-            return BadRequest();
+            LoginModel model = new LoginModel();
+            var response = loginRepository.GetLogin(login.Email, login.Password);
+            return Ok();
         }
     }
 }
