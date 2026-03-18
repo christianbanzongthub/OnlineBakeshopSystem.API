@@ -1,68 +1,157 @@
 ﻿using Dapper;
+using OnlineBakeshop.API.Model;
+using OnlineBakeshop.API.Model.Response;
+using OnlineBakeshop.API.IRepository;
 using System.Data;
 using System.Data.SqlClient;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using OnlineBakeshop.API.Model;
 
-public class OrderClass : IOrderRepository
+namespace OnlineBakeshop.API.Class
 {
-    private readonly IConfiguration _config;
-    private readonly SqlConnection _conn;
-
-    public OrderClass(IConfiguration config)
+    public class OrderClass : IOrderRepository
     {
-        _config = config;
-        _conn = new SqlConnection(_config["ConnectionStrings:OnlineBakeshopdb"]);
-    }
+        private readonly IConfiguration _config;
+        private readonly SqlConnection _conn;
 
-    public async Task<int> CreateOrder(OrderModel order)
-    {
-        var param = new DynamicParameters();
-        param.Add("@UserId", order.UserId);
-        param.Add("@Quantity", order.Quantity);
-        param.Add("@TotalPrice", order.TotalPrice);
-        param.Add("@OrderStatus", order.OrderStatus ?? "Pending");
-        param.Add("@statementType", "CREATE");
+        public OrderClass(IConfiguration config)
+        {
+            _config = config;
+            _conn = new SqlConnection(_config["ConnectionStrings:OnlineBakeshopdb"]);
+        }
 
-        return await _conn.ExecuteScalarAsync<int>( "SP_ONLINEBAKESHOPDB_ORDERS",param,commandType: CommandType.StoredProcedure );
-    }
+        public async Task<ServiceResponse<object>> CreateOrder(OrderModel order)
+        {
+            ServiceResponse<object> service = new ServiceResponse<object>();
+            try
+            {
+                var param = new DynamicParameters();
+                param.Add("@userId", order.UserId);
+                param.Add("@productId", order.ProductId); 
+                param.Add("@quantity", order.Quantity);
+                param.Add("@totalPrice", order.TotalPrice);
+                param.Add("@OrderStatus", order.OrderStatus ?? "Pending");
+                param.Add("@statementType", "CREATE");
 
-    public async Task<List<OrderModel>> GetAllOrders()
-    {
-        var param = new DynamicParameters();
-        param.Add("@statementType", "GETALL");
+                await _conn.ExecuteAsync(
+                    "SP_ONLINEBAKESHOPDB_ORDERS",
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
 
-        var result = await _conn.QueryAsync<OrderModel>("SP_ONLINEBAKESHOPDB_ORDERS", param, commandType: CommandType.StoredProcedure);
-        return result.ToList();
-    }
+                service.Status = 200;
+                service.Message = "Order Created Successfully";
+            }
+            catch (Exception ex)
+            {
+                service.Status = 500;
+                service.Message = ex.Message;
+            }
+            return service;
+        }
+
+        public async Task<ServiceResponse<object>> GetAllOrders()
+        {
+            ServiceResponse<object> service = new ServiceResponse<object>();
+            try
+            {
+                var param = new DynamicParameters();
+                param.Add("@statementType", "GETALL");
+
+                var result = await _conn.QueryAsync(
+                    "SP_ONLINEBAKESHOPDB_ORDERS",
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                service.Status = 200;
+                service.Data = result.ToList();
+            }
+            catch (Exception ex)
+            {
+                service.Status = 500;
+                service.Message = ex.Message;
+            }
+            return service;
+        }
 
 
-    public async Task<OrderModel> GetOrderById(int orderId)
-    {
-        var param = new DynamicParameters();
-        param.Add("@OrderId", orderId);
-        param.Add("@statementType", "GETBYID");
+        public async Task<ServiceResponse<object>> GetOrderById(int orderId)
+        {
+            ServiceResponse<object> service = new ServiceResponse<object>();
+            try
+            {
+                var param = new DynamicParameters();
+                param.Add("@orderId", orderId);
+                param.Add("@statementType", "GETBYID");
 
-        return await _conn.QueryFirstOrDefaultAsync<OrderModel>("SP_ONLINEBAKESHOPDB_ORDERS", param, commandType: CommandType.StoredProcedure);
-    }
+                var result = await _conn.QueryAsync(
+                    "SP_ONLINEBAKESHOPDB_ORDERS",
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
 
-    public async Task UpdateOrder(OrderModel order)
-    {
-        var param = new DynamicParameters();
-        param.Add("@OrderId", order.OrderId);
-        param.Add("@OrderStatus", order.OrderStatus);
-        param.Add("@statementType", "UPDATESTATUS");
+                service.Status = 200;
+                service.Data = result.ToList();
+            }
+            catch (Exception ex)
+            {
+                service.Status = 500;
+                service.Message = ex.Message;
+            }
+            return service;
+        }
 
-        await _conn.ExecuteAsync("SP_ONLINEBAKESHOPDB_ORDERS", param, commandType: CommandType.StoredProcedure );
-    }
-    public async Task DeleteOrder(int orderId)
-    {
-        var param = new DynamicParameters();
-        param.Add("@OrderId", orderId);
-        param.Add("@statementType", "DELETE");
+        public async Task<ServiceResponse<object>> UpdateOrder(OrderModel order)
+        {
+            ServiceResponse<object> service = new ServiceResponse<object>();
+            try
+            {
+                var param = new DynamicParameters();
+                param.Add("@orderId", order.OrderId);
+                param.Add("@OrderStatus", order.OrderStatus);
+                param.Add("@statementType", "UPDATESTATUS");
 
-        await _conn.ExecuteAsync("SP_ONLINEBAKESHOPDB_ORDERS", param, commandType: CommandType.StoredProcedure);
+                await _conn.ExecuteAsync(
+                    "SP_ONLINEBAKESHOPDB_ORDERS",
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                service.Status = 200;
+                service.Message = "Order Updated Successfully";
+            }
+            catch (Exception ex)
+            {
+                service.Status = 500;
+                service.Message = ex.Message;
+            }
+            return service;
+        }
+
+ 
+        public async Task<ServiceResponse<object>> DeleteOrder(int orderId)
+        {
+            ServiceResponse<object> service = new ServiceResponse<object>();
+            try
+            {
+                var param = new DynamicParameters();
+                param.Add("@orderId", orderId);
+                param.Add("@statementType", "DELETE");
+
+                await _conn.ExecuteAsync(
+                    "SP_ONLINEBAKESHOPDB_ORDERS",
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                service.Status = 200;
+                service.Message = "Order Deleted Successfully";
+            }
+            catch (Exception ex)
+            {
+                service.Status = 500;
+                service.Message = ex.Message;
+            }
+            return service;
+        }
     }
 }

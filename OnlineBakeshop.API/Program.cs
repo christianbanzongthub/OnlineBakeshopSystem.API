@@ -70,7 +70,7 @@ namespace OnlineBakeshop.API
                     {
                         new OpenApiSecurityScheme
                         {
-                            Reference = new OpenApiReference  // Now works correctly
+                            Reference = new OpenApiReference  
                             {
                                 Type = ReferenceType.SecurityScheme,
                                 Id = "Bearer"

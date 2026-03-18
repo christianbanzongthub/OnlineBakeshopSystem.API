@@ -62,7 +62,6 @@ public class RegisterClass : IRegisterRepository
         return service;
     }
 
-    // TOKEN GENERATOR
     private string GenerateToken(string email)
     {
         var jwtSettings = _configuration.GetSection("JwtSettings");

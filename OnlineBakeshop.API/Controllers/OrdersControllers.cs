@@ -1,61 +1,62 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OnlineBakeshop.API.IRepository;
 using OnlineBakeshop.API.Model;
-using System.Threading.Tasks;
 
-[ApiController]
-[Route("api/[controller]")]
-public class OrdersController : Controller
+namespace OnlineBakeshop.API.Controllers
 {
-    private readonly IOrderRepository _orderRepository;
-
-    public OrdersController(IOrderRepository orderRepository)
+    [ApiController]
+    [Route("[controller]")]
+    public class OrdersController : Controller
     {
-        _orderRepository = orderRepository;
-    }
+        IOrderRepository orderRepository;
 
-    [HttpPost]
-    [Route("CreateOrder")]
-    public async Task<IActionResult> CreateOrder(OrderModel order)
-    {
-        order.UserId = 1;    
-        order.ProductId = 1; 
+        public OrdersController(IOrderRepository order)
+        {
+            orderRepository = order;
+        }
 
-        var response = await _orderRepository.CreateOrder(order);
-        return Ok(response);
-    }
 
-    [HttpGet]
-    [Route("GetOrder/{id}")]
-    public async Task<IActionResult> GetOrder(int id)
-    {
-        var response = await _orderRepository.GetOrderById(id);
-        if (response == null) return NotFound();
-        return Ok(response);
-    }
+        [HttpPost]
+        [Route("CreateOrder")]
+        public async Task<IActionResult> CreateOrder(OrderModel order)
+        {
+            var response = await orderRepository.CreateOrder(order);
+            return Ok(response);
+        }
 
-    [HttpGet]
-    [Route("GetAllOrders")]
-    public async Task<IActionResult> GetAllOrders()
-    {
-        var response = await _orderRepository.GetAllOrders();
-        return Ok(response);
-    }
+    
+        [HttpGet]
+        [Route("GetAllOrders")]
+        public async Task<IActionResult> GetAllOrders()
+        {
+            var response = await orderRepository.GetAllOrders();
+            return Ok(response);
+        }
 
-    [HttpPut]
-    [Route("UpdateOrder/{id}")]
-    public async Task<IActionResult> UpdateOrder(int id, OrderModel order)
-    {
-        order.OrderId = id;
-        await _orderRepository.UpdateOrder(order);
-        return Ok(new { Message = "Order Status Updated" });
-    }
+  
+        [HttpGet]
+        [Route("GetOrderById")]
+        public async Task<IActionResult> GetOrderById(int orderId)
+        {
+            var response = await orderRepository.GetOrderById(orderId);
+            return Ok(response);
+        }
 
-    [HttpDelete]
-    [Route("DeleteOrder/{id}")]
-    public async Task<IActionResult> DeleteOrder(int id)
-    {
-        await _orderRepository.DeleteOrder(id);
-        return Ok(new { Message = "Order deleted successfully" });
+ 
+        [HttpPut]
+        [Route("UpdateOrder")]
+        public async Task<IActionResult> UpdateOrder(OrderModel order)
+        {
+            var response = await orderRepository.UpdateOrder(order);
+            return Ok(response);
+        }
+
+        [HttpDelete]
+        [Route("DeleteOrder")]
+        public async Task<IActionResult> DeleteOrder(int orderId)
+        {
+            var response = await orderRepository.DeleteOrder(orderId);
+            return Ok(response);
+        }
     }
 }

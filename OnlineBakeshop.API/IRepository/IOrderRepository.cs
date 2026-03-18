@@ -1,12 +1,14 @@
 ﻿using OnlineBakeshop.API.Model;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using OnlineBakeshop.API.Model.Response;
 
-public interface IOrderRepository
+namespace OnlineBakeshop.API.IRepository
 {
-    Task<int> CreateOrder(OrderModel order);
-    Task<List<OrderModel>> GetAllOrders();
-    Task<OrderModel> GetOrderById(int orderId);
-    Task UpdateOrder(OrderModel order);
-    Task DeleteOrder(int orderId);
+    public interface IOrderRepository
+    {
+        Task<ServiceResponse<object>> CreateOrder(OrderModel order);
+        Task<ServiceResponse<object>> GetAllOrders();
+        Task<ServiceResponse<object>> GetOrderById(int orderId);
+        Task<ServiceResponse<object>> UpdateOrder(OrderModel order);
+        Task<ServiceResponse<object>> DeleteOrder(int orderId);
+    }
 }

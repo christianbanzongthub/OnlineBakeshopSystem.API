@@ -4,7 +4,6 @@ using OnlineBakeshop.API.IRepository;
 using OnlineBakeshop.API.Model;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -25,29 +24,27 @@ namespace OnlineBakeshop.API.Class
 
         public async Task<ServiceResponse<object>> GetLogin(string email, string password)
         {
-            var service = new ServiceResponse<object>();
-
+            ServiceResponse<object> service = new ServiceResponse<object>();
             try
             {
                 var param = new DynamicParameters();
                 param.Add("@email", email);
                 param.Add("@password", password);
 
-                var result = conn.Query("SP_ONLINEBAKESHOPDB_GETUSERLOGIN", param, commandType: CommandType.StoredProcedure).ToList();
+                var result = conn.QueryFirstOrDefault("SP_ONLINEBAKESHOPDB_GETUSERLOGIN",param,commandType: CommandType.StoredProcedure);
 
-                if (result.Count > 0)
+                if (result != null)
                 {
-                    // GENERATE TOKEN
+                
                     string token = GenerateToken(email);
-
                     service.Status = 200;
-                    service.Data = result;
+                    service.Data = result;  
                     service.Token = token;
                 }
                 else
                 {
                     service.Status = 400;
-                    service.Message = "No Record Found";
+                    service.Message = "Invalid Email or Password";
                 }
             }
             catch (Exception ex)
@@ -55,35 +52,30 @@ namespace OnlineBakeshop.API.Class
                 service.Status = 500;
                 service.Message = ex.Message;
             }
-
             return service;
         }
 
-        // ================= TOKEN GENERATOR =================
         private string GenerateToken(string email)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");
-
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(jwtSettings["SecretKey"])
             );
-
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
-
             var token = new JwtSecurityToken(
                 issuer: jwtSettings["Issuer"],
                 audience: jwtSettings["Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(Convert.ToDouble(jwtSettings["ExpiryMinutes"])),
+                expires: DateTime.Now.AddMinutes(
+                    Convert.ToDouble(jwtSettings["ExpiryMinutes"])
+                ),
                 signingCredentials: credentials
             );
-
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }

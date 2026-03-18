@@ -7,12 +7,6 @@ namespace OnlineBakeshop.API.IRepository
     {
         Task<ServiceResponse<object>> GetProducts();
 
-        Task<ServiceResponse<object>> CreateProduct(
-            string productName,
-            string description,
-            decimal price,
-            string imageUrl,
-            bool isAvailable
-        );
+        Task<ServiceResponse<object>> CreateProduct( string productName, string description, decimal price, string imageUrl, bool isAvailable);
     }
 }
