@@ -40,7 +40,6 @@ public class RegisterClass : IRegisterRepository
 
             if (result.Count > 0)
             {
-                // GENERATE TOKEN AFTER REGISTER
                 string token = GenerateToken(email);
 
                 service.Status = 200;

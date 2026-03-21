@@ -43,6 +43,16 @@ namespace OnlineBakeshop.API
             builder.Services.AddScoped<IProductRepository, ProductClass>();
             builder.Services.AddScoped<IRegisterRepository, RegisterClass>();
             builder.Services.AddScoped<ILoginRepository, LoginClass>();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    policy =>
+                    {
+                        policy.AllowAnyOrigin()
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
+                    });
+            });
             builder.Services.AddControllers();
 
 
@@ -90,6 +100,7 @@ namespace OnlineBakeshop.API
             }
 
             app.UseHttpsRedirection();
+            app.UseCors("AllowAll");
             app.UseAuthentication(); // MUST come before Authorization
             app.UseAuthorization();
             app.MapControllers();

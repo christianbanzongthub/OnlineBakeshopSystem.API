@@ -20,9 +20,6 @@ namespace OnlineBakeshop.API.Class
             conn = new SqlConnection(config["ConnectionStrings:OnlineBakeshopdb"]);
         }
 
-        // =============================================
-        // GET ALL CATEGORIES
-        // =============================================
         public async Task<ServiceResponse<object>> GetCategories()
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
@@ -52,9 +49,7 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        // =============================================
-        // GET CATEGORY BY ID
-        // =============================================
+
         public async Task<ServiceResponse<object>> GetCategoryById(int categoryId)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
