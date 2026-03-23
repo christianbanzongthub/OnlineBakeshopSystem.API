@@ -14,6 +14,7 @@ namespace OnlineBakeshop.API.Class
         public ValidationClass(IConfiguration config)
         {
             conn = new SqlConnection(config["ConnectionString:BakeshopDB"]);
+
         }
 
         public async Task<ServiceResponse<ValidationModel>> ValidateOrder(int userId, int productId, int quantity)
