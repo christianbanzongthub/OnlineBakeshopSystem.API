@@ -12,6 +12,7 @@ namespace OnlineBakeshop.API.Class
         private readonly SqlConnection conn;
 
         public ValidationClass(IConfiguration config)
+
         {
             conn = new SqlConnection(config["ConnectionString:BakeshopDB"]);
 
