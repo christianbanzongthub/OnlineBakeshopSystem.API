@@ -9,22 +9,33 @@ namespace OnlineBakeshop.API.Controllers
     public class OrdersController : Controller
     {
         IOrderRepository orderRepository;
+        IValidationRepository validationRepository;
 
-        public OrdersController(IOrderRepository order)
+        public OrdersController(IOrderRepository order, IValidationRepository validation)
         {
             orderRepository = order;
+            validationRepository = validation;
         }
-
 
         [HttpPost]
         [Route("CreateOrder")]
         public async Task<IActionResult> CreateOrder(OrderModel order)
         {
+            var validation = await validationRepository.ValidateOrder(
+                order.UserId, order.ProductId, order.Quantity
+            );
+
+            if (validation.Data == null || !validation.Data.IsValid)
+                return BadRequest(new
+                {
+                    success = false,
+                    message = validation.Data?.Message ?? "Validation failed"
+                });
+
             var response = await orderRepository.CreateOrder(order);
             return Ok(response);
         }
 
-    
         [HttpGet]
         [Route("GetAllOrders")]
         public async Task<IActionResult> GetAllOrders()
@@ -33,7 +44,6 @@ namespace OnlineBakeshop.API.Controllers
             return Ok(response);
         }
 
-  
         [HttpGet]
         [Route("GetOrderById")]
         public async Task<IActionResult> GetOrderById(int orderId)
@@ -42,7 +52,6 @@ namespace OnlineBakeshop.API.Controllers
             return Ok(response);
         }
 
- 
         [HttpPut]
         [Route("UpdateOrder")]
         public async Task<IActionResult> UpdateOrder(OrderModel order)

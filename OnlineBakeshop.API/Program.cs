@@ -37,7 +37,7 @@ namespace OnlineBakeshop.API
             });
 
             builder.Services.AddAuthorization();
-
+            builder.Services.AddScoped<IValidationRepository, ValidationClass>();
             builder.Services.AddScoped<ICategoryRepository, CategoryClass>();
             builder.Services.AddScoped<IOrderRepository, OrderClass>();
             builder.Services.AddScoped<IProductRepository, ProductClass>();

@@ -83,9 +83,7 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        // =============================================
-        // CREATE CATEGORY
-        // =============================================
+
         public async Task<ServiceResponse<object>> CreateCategory(CategoryModel category)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
@@ -112,9 +110,7 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        // =============================================
-        // UPDATE CATEGORY
-        // =============================================
+
         public async Task<ServiceResponse<object>> UpdateCategory(CategoryModel category)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
@@ -142,9 +138,7 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        // =============================================
-        // DELETE CATEGORY
-        // =============================================
+
         public async Task<ServiceResponse<object>> DeleteCategory(int categoryId)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
