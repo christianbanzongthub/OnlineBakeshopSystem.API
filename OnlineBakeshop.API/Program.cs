@@ -2,12 +2,8 @@ using OnlineBakeshop.API.Class;
 using OnlineBakeshop.API.IRepository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;  
+using Microsoft.OpenApi.Models;
 using System.Text;
-using Microsoft.OpenApi;
-
-
-
 
 namespace OnlineBakeshop.API
 {
@@ -17,6 +13,7 @@ namespace OnlineBakeshop.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
+         
             var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -37,24 +34,26 @@ namespace OnlineBakeshop.API
             });
 
             builder.Services.AddAuthorization();
+
+            
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+            builder.Services.AddScoped<IUserRepository, UserClass>();
+            builder.Services.AddScoped<IAdminRepository, AdminClass>();
             builder.Services.AddScoped<IValidationRepository, ValidationClass>();
             builder.Services.AddScoped<ICategoryRepository, CategoryClass>();
             builder.Services.AddScoped<IOrderRepository, OrderClass>();
             builder.Services.AddScoped<IProductRepository, ProductClass>();
             builder.Services.AddScoped<IRegisterRepository, RegisterClass>();
             builder.Services.AddScoped<ILoginRepository, LoginClass>();
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAll",
-                    policy =>
-                    {
-                        policy.AllowAnyOrigin()
-                              .AllowAnyHeader()
-                              .AllowAnyMethod();
-                    });
-            });
             builder.Services.AddControllers();
-
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
@@ -80,7 +79,7 @@ namespace OnlineBakeshop.API
                     {
                         new OpenApiSecurityScheme
                         {
-                            Reference = new OpenApiReference  
+                            Reference = new OpenApiReference
                             {
                                 Type = ReferenceType.SecurityScheme,
                                 Id = "Bearer"
@@ -100,8 +99,8 @@ namespace OnlineBakeshop.API
             }
 
             app.UseHttpsRedirection();
-            app.UseCors("AllowAll");
-            app.UseAuthentication(); // MUST come before Authorization
+            app.UseCors("AllowAll");          
+            app.UseAuthentication();          
             app.UseAuthorization();
             app.MapControllers();
             app.Run();

@@ -7,19 +7,21 @@ using System.Data.SqlClient;
 
 namespace OnlineBakeshop.API.Class
 {
-    public class ProductClass : IProductRepository
+    public class UserClass : IUserRepository
     {
         private readonly IConfiguration _configuration;
         private readonly SqlConnection conn;
 
-        public ProductClass(IConfiguration config)
+        public UserClass(IConfiguration config)
         {
             _configuration = config;
             conn = new SqlConnection(config["ConnectionStrings:OnlineBakeshopdb"]);
         }
 
-        
-        public async Task<ServiceResponse<object>> GetAllProducts()
+        // =============================================
+        // GET ALL USERS
+        // =============================================
+        public async Task<ServiceResponse<object>> GetAllUsers()
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
             try
@@ -28,7 +30,7 @@ namespace OnlineBakeshop.API.Class
                 param.Add("@statementType", "GETALL");
 
                 var result = conn.Query(
-                    "SP_ONLINEBAKESHOPDB_PRODUCT",
+                    "SP_ONLINEBAKESHOPDB_USERS",
                     param,
                     commandType: CommandType.StoredProcedure
                 ).ToList();
@@ -41,7 +43,7 @@ namespace OnlineBakeshop.API.Class
                 else
                 {
                     service.Status = 404;
-                    service.Message = "No Products Found";
+                    service.Message = "No Users Found";
                 }
             }
             catch (Exception ex)
@@ -52,18 +54,20 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        
-        public async Task<ServiceResponse<object>> GetProductById(int productId)
+        // =============================================
+        // GET USER BY ID
+        // =============================================
+        public async Task<ServiceResponse<object>> GetUserById(int userId)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
             try
             {
                 var param = new DynamicParameters();
-                param.Add("@productId", productId);
+                param.Add("@userId", userId);
                 param.Add("@statementType", "GETBYID");
 
                 var result = conn.QueryFirstOrDefault(
-                    "SP_ONLINEBAKESHOPDB_PRODUCT",
+                    "SP_ONLINEBAKESHOPDB_USERS",
                     param,
                     commandType: CommandType.StoredProcedure
                 );
@@ -76,7 +80,7 @@ namespace OnlineBakeshop.API.Class
                 else
                 {
                     service.Status = 404;
-                    service.Message = "Product Not Found";
+                    service.Message = "User Not Found";
                 }
             }
             catch (Exception ex)
@@ -87,59 +91,30 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        
-        public async Task<ServiceResponse<object>> CreateProduct(ProductModel product)
+        // =============================================
+        // UPDATE USER
+        // =============================================
+        public async Task<ServiceResponse<object>> UpdateUser(UserModel user)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
             try
             {
                 var param = new DynamicParameters();
-                param.Add("@productName", product.ProductName);
-                param.Add("@description", product.Description);
-                param.Add("@price", product.Price);
-                param.Add("@imageUrl", product.ImageUrl);
-                param.Add("@statementType", "CREATE");
-
-                conn.Execute(
-                    "SP_ONLINEBAKESHOPDB_PRODUCT",
-                    param,
-                    commandType: CommandType.StoredProcedure
-                );
-
-                service.Status = 200;
-                service.Message = "Product Created Successfully";
-            }
-            catch (Exception ex)
-            {
-                service.Status = 500;
-                service.Message = ex.Message;
-            }
-            return service;
-        }
-
-        // UPDATE PRODUCT
-        public async Task<ServiceResponse<object>> UpdateProduct(ProductModel product)
-        {
-            ServiceResponse<object> service = new ServiceResponse<object>();
-            try
-            {
-                var param = new DynamicParameters();
-                param.Add("@productId", product.ProductId);
-                param.Add("@productName", product.ProductName);
-                param.Add("@description", product.Description);
-                param.Add("@price", product.Price);
-                param.Add("@imageUrl", product.ImageUrl);
-                param.Add("@isAvailable", product.IsAvailable);
+                param.Add("@userId", user.UserId);
+                param.Add("@fullName", user.FullName);
+                param.Add("@email", user.Email);
+                param.Add("@address", user.Address);
+                param.Add("@contactNo", user.ContactNo);
                 param.Add("@statementType", "UPDATE");
 
                 conn.Execute(
-                    "SP_ONLINEBAKESHOPDB_PRODUCT",
+                    "SP_ONLINEBAKESHOPDB_USERS",
                     param,
                     commandType: CommandType.StoredProcedure
                 );
 
                 service.Status = 200;
-                service.Message = "Product Updated Successfully";
+                service.Message = "User Updated Successfully";
             }
             catch (Exception ex)
             {
@@ -148,26 +123,27 @@ namespace OnlineBakeshop.API.Class
             }
             return service;
         }
-        
 
-
-        public async Task<ServiceResponse<object>> DeleteProduct(int productId)
+        // =============================================
+        // DELETE USER
+        // =============================================
+        public async Task<ServiceResponse<object>> DeleteUser(int userId)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
             try
             {
                 var param = new DynamicParameters();
-                param.Add("@productId", productId);
+                param.Add("@userId", userId);
                 param.Add("@statementType", "DELETE");
 
                 conn.Execute(
-                    "SP_ONLINEBAKESHOPDB_PRODUCT",
+                    "SP_ONLINEBAKESHOPDB_USERS",
                     param,
                     commandType: CommandType.StoredProcedure
                 );
 
                 service.Status = 200;
-                service.Message = "Product Deleted Successfully";
+                service.Message = "User Deleted Successfully";
             }
             catch (Exception ex)
             {
