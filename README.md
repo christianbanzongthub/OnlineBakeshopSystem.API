@@ -1,8 +1,9 @@
-March 25, 2026
+March 26, 2026
 
-We change the stored procedure from SP_ONLINEBAKESHOPDB_CREATEPRODUCT and SP_ONLINEBAKESHOPDB_GETPRODUCTS into one and we call it SP_ONLINEBAKESHOPDB_PRODUCT.
-One thing we do this day we add new api for products such as GetProductById, UpdateProduct, DeleteProduct and GetAllProducts. We make some changes in the database 
-specifically on the tbl_products and alter the imageUrl.
-ALTER TABLE tbl_products
-ALTER COLUMN imageUrl NVARCHAR(MAX);
+We add new Controller called UploadController for admin to upload image for the new product thats it ms then we proceed to our frontend.
+
+To Frontend ms we have now a Users.razor and Orders.razor, and in the Users its working but we still thinking if we can add something to it and for the Orders we add new page but still we need to fix it ms.
+
+Lastly ms in mobile we have changes for User Profile if user logging in they will see now in their profile, their Full name and Gmail and also a Notification to welcome the new user,
+thats it for today ms.
 THANK YOU MS.
