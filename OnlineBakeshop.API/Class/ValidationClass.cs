@@ -12,15 +12,17 @@ namespace OnlineBakeshop.API.Class
         private readonly SqlConnection conn;
 
         public ValidationClass(IConfiguration config)
-
         {
-            conn = new SqlConnection(config["ConnectionString:BakeshopDB"]);
-
+            // ✅ FIXED — matches your other classes
+            conn = new SqlConnection(config["ConnectionStrings:OnlineBakeshopdb"]);
         }
 
+        // =============================================
+        // VALIDATE ORDER
+        // =============================================
         public async Task<ServiceResponse<ValidationModel>> ValidateOrder(int userId, int productId, int quantity)
         {
-            var service = new ServiceResponse<ValidationModel>();
+            ServiceResponse<ValidationModel> service = new ServiceResponse<ValidationModel>();
             try
             {
                 var param = new DynamicParameters();
@@ -28,7 +30,11 @@ namespace OnlineBakeshop.API.Class
                 param.Add("@productId", productId);
                 param.Add("@quantity", quantity);
 
-                var result = await conn.QueryFirstOrDefaultAsync<ValidationModel>( "SP_ONLINEBAKESHOPDB_VALIDATEORDER", param, commandType: CommandType.StoredProcedure);
+                var result = await conn.QueryFirstOrDefaultAsync<ValidationModel>(
+                    "SP_ONLINEBAKESHOPDB_VALIDATEORDER",
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
 
                 service.Status = 200;
                 service.Data = result;
@@ -38,20 +44,26 @@ namespace OnlineBakeshop.API.Class
                 service.Status = 500;
                 service.Message = ex.Message;
             }
-
             return service;
         }
 
+        // =============================================
+        // VALIDATE PRODUCT
+        // =============================================
         public async Task<ServiceResponse<ValidationModel>> ValidateProduct(string productName, decimal price)
         {
-            var service = new ServiceResponse<ValidationModel>();
+            ServiceResponse<ValidationModel> service = new ServiceResponse<ValidationModel>();
             try
             {
                 var param = new DynamicParameters();
                 param.Add("@productName", productName);
                 param.Add("@price", price);
 
-                var result = await conn.QueryFirstOrDefaultAsync<ValidationModel>( "SP_ONLINEBAKESHOPDB_VALIDATEPRODUCTS", param, commandType: CommandType.StoredProcedure);
+                var result = await conn.QueryFirstOrDefaultAsync<ValidationModel>(
+                    "SP_ONLINEBAKESHOPDB_VALIDATEPRODUCTS",
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
 
                 service.Status = 200;
                 service.Data = result;
@@ -61,13 +73,15 @@ namespace OnlineBakeshop.API.Class
                 service.Status = 500;
                 service.Message = ex.Message;
             }
-
             return service;
         }
 
+        // =============================================
+        // VALIDATE USER
+        // =============================================
         public async Task<ServiceResponse<ValidationModel>> ValidateUser(string fullName, string email, string password, string contactNo)
         {
-            var service = new ServiceResponse<ValidationModel>();
+            ServiceResponse<ValidationModel> service = new ServiceResponse<ValidationModel>();
             try
             {
                 var param = new DynamicParameters();
@@ -76,7 +90,11 @@ namespace OnlineBakeshop.API.Class
                 param.Add("@password", password);
                 param.Add("@contactNo", contactNo);
 
-                var result = await conn.QueryFirstOrDefaultAsync<ValidationModel>("SP_ONLINEBAKESHOPDB_VALIDATEUSERS", param,  commandType: CommandType.StoredProcedure);
+                var result = await conn.QueryFirstOrDefaultAsync<ValidationModel>(
+                    "SP_ONLINEBAKESHOPDB_VALIDATEUSERS",
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
 
                 service.Status = 200;
                 service.Data = result;
@@ -86,7 +104,6 @@ namespace OnlineBakeshop.API.Class
                 service.Status = 500;
                 service.Message = ex.Message;
             }
-
             return service;
         }
     }

@@ -60,6 +60,14 @@ namespace OnlineBakeshop.API.Controllers
             return Ok(response);
         }
 
+        [HttpPut]
+        [Route("RejectOrder")]
+        public async Task<IActionResult> RejectOrder(int orderId)
+        {
+            var response = await orderRepository.RejectOrder(orderId);
+            return Ok(response);
+        }
+
         [HttpDelete]
         [Route("DeleteOrder")]
         public async Task<IActionResult> DeleteOrder(int orderId)
