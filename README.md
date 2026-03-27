@@ -1,9 +1,11 @@
-March 26, 2026
+March 27, 2026
 
-We add new Controller called UploadController for admin to upload image for the new product thats it ms then we proceed to our frontend.
+We add new api for customization of an order so that users can customize order for cakes and cupcakes only. We add also new table as well stored procedure for custom order.
 
-To Frontend ms we have now a Users.razor and Orders.razor, and in the Users its working but we still thinking if we can add something to it and for the Orders we add new page but still we need to fix it ms.
+Today in frontend we're focus in order part, because we add new api for customOrder, the admin can see both regular and customize order in the order table in orderpage. The row in the table is clickable, if clicked we can see all the order details in both regular order and customized. If theres a user send a customize order, they can't pay unless if the admins set the price first and send it back to the user(this part is still unfinished).
 
-Lastly ms in mobile we have changes for User Profile if user logging in they will see now in their profile, their Full name and Gmail and also a Notification to welcome the new user,
-thats it for today ms.
-THANK YOU MS.
+Mobile make the register fully functioned connected to the backend database.
+
+
+
+
