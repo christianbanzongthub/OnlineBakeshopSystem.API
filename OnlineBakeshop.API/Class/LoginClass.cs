@@ -25,20 +25,38 @@ namespace OnlineBakeshop.API.Class
         public async Task<ServiceResponse<object>> GetLogin(string email, string password)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
+
             try
             {
                 var param = new DynamicParameters();
                 param.Add("@email", email);
-                param.Add("@password", password);
 
-                var result = conn.QueryFirstOrDefault("SP_ONLINEBAKESHOPDB_GETUSERLOGIN",param,commandType: CommandType.StoredProcedure);
+                var result = conn.QueryFirstOrDefault("SP_ONLINEBAKESHOPDB_GETUSERLOGIN", param, commandType: CommandType.StoredProcedure);
 
                 if (result != null)
                 {
-                
+                   
+                    string hashedPassword = result.password;
+                    bool isPasswordValid = BCrypt.Net.BCrypt.Verify(password, hashedPassword);
+
+                    if (!isPasswordValid)
+                    {
+                        service.Status = 400;
+                        service.Message = "Invalid Email or Password";
+                        return service;
+                    }
+
                     string token = GenerateToken(email);
                     service.Status = 200;
-                    service.Data = result;  
+                    service.Data = new
+                    {
+                        result.userId,
+                        result.fullName,
+                        result.email,
+                        result.address,
+                        result.contactNo,
+                        result.dateCreated
+                    };
                     service.Token = token;
                 }
                 else
@@ -52,21 +70,26 @@ namespace OnlineBakeshop.API.Class
                 service.Status = 500;
                 service.Message = ex.Message;
             }
+
             return service;
         }
 
         private string GenerateToken(string email)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");
+
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(jwtSettings["SecretKey"])
             );
+
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
+
             var token = new JwtSecurityToken(
                 issuer: jwtSettings["Issuer"],
                 audience: jwtSettings["Audience"],
@@ -76,6 +99,7 @@ namespace OnlineBakeshop.API.Class
                 ),
                 signingCredentials: credentials
             );
+
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }

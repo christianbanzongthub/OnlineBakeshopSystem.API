@@ -13,13 +13,10 @@ namespace OnlineBakeshop.API.Class
 
         public ValidationClass(IConfiguration config)
         {
-            // ✅ FIXED — matches your other classes
             conn = new SqlConnection(config["ConnectionStrings:OnlineBakeshopdb"]);
         }
 
-        // =============================================
-        // VALIDATE ORDER
-        // =============================================
+
         public async Task<ServiceResponse<ValidationModel>> ValidateOrder(int userId, int productId, int quantity)
         {
             ServiceResponse<ValidationModel> service = new ServiceResponse<ValidationModel>();
@@ -47,9 +44,7 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        // =============================================
-        // VALIDATE PRODUCT
-        // =============================================
+    
         public async Task<ServiceResponse<ValidationModel>> ValidateProduct(string productName, decimal price)
         {
             ServiceResponse<ValidationModel> service = new ServiceResponse<ValidationModel>();
@@ -76,9 +71,7 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        // =============================================
-        // VALIDATE USER
-        // =============================================
+
         public async Task<ServiceResponse<ValidationModel>> ValidateUser(string fullName, string email, string password, string contactNo)
         {
             ServiceResponse<ValidationModel> service = new ServiceResponse<ValidationModel>();

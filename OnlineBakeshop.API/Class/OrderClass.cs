@@ -18,9 +18,6 @@ namespace OnlineBakeshop.API.Class
             conn = new SqlConnection(config["ConnectionStrings:OnlineBakeshopdb"]);
         }
 
-        // =============================================
-        // CREATE ORDER
-        // =============================================
         public async Task<ServiceResponse<object>> CreateOrder(OrderModel order)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
@@ -50,9 +47,7 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        // =============================================
-        // GET ALL ORDERS
-        // =============================================
+
         public async Task<ServiceResponse<object>> GetAllOrders()
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
@@ -86,9 +81,6 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        // =============================================
-        // GET ORDER BY ID
-        // =============================================
         public async Task<ServiceResponse<object>> GetOrderById(int orderId)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
@@ -123,9 +115,6 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        // =============================================
-        // UPDATE ORDER STATUS
-        // =============================================
         public async Task<ServiceResponse<object>> UpdateOrder(OrderModel order)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
@@ -153,9 +142,6 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        // =============================================
-        // REJECT ORDER
-        // =============================================
         public async Task<ServiceResponse<object>> RejectOrder(int orderId)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
@@ -182,9 +168,7 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        // =============================================
-        // DELETE ORDER
-        // =============================================
+
         public async Task<ServiceResponse<object>> DeleteOrder(int orderId)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
