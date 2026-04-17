@@ -15,27 +15,32 @@ namespace OnlineBakeshop.API.Class
     {
         private readonly IConfiguration _configuration;
         private readonly SqlConnection conn;
+        private readonly AuthClass _authClass;
 
         public LoginClass(IConfiguration config)
         {
             _configuration = config;
             conn = new SqlConnection(config["ConnectionStrings:OnlineBakeshopdb"]);
+            _authClass = new AuthClass(config);
         }
 
         public async Task<ServiceResponse<object>> GetLogin(string email, string password)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
-
             try
             {
                 var param = new DynamicParameters();
                 param.Add("@email", email);
 
-                var result = conn.QueryFirstOrDefault("SP_ONLINEBAKESHOPDB_GETUSERLOGIN", param, commandType: CommandType.StoredProcedure);
+                var result = conn.QueryFirstOrDefault(
+                    "SP_ONLINEBAKESHOPDB_GETUSERLOGIN",
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
 
                 if (result != null)
                 {
-                   
+                    // Step 1: Verify password
                     string hashedPassword = result.password;
                     bool isPasswordValid = BCrypt.Net.BCrypt.Verify(password, hashedPassword);
 
@@ -46,7 +51,28 @@ namespace OnlineBakeshop.API.Class
                         return service;
                     }
 
-                    string token = GenerateToken(email);
+                    // Step 2: Generate JWT
+                    string token = _authClass.GenerateToken(email);
+
+                    // Step 3: Generate Refresh Token
+                    string refreshToken = _authClass.GenerateRefreshToken();
+
+                    // Step 4: Save refresh token to DB
+                    var rtParam = new DynamicParameters();
+                    rtParam.Add("@userId", result.userId);
+                    rtParam.Add("@email", email);
+                    rtParam.Add("@refreshToken", refreshToken);
+                    rtParam.Add("@expiryDate", DateTime.Now.AddDays(
+                        Convert.ToDouble(_configuration["JwtSettings:RefreshTokenExpiryDays"])
+                    ));
+                    rtParam.Add("@statementType", "INSERT");
+
+                    conn.Execute(
+                        "SP_ONLINEBAKESHOPDB_REFRESHTOKENS",
+                        rtParam,
+                        commandType: CommandType.StoredProcedure
+                    );
+
                     service.Status = 200;
                     service.Data = new
                     {
@@ -58,6 +84,7 @@ namespace OnlineBakeshop.API.Class
                         result.dateCreated
                     };
                     service.Token = token;
+                    service.RefreshToken = refreshToken;
                 }
                 else
                 {
@@ -70,37 +97,7 @@ namespace OnlineBakeshop.API.Class
                 service.Status = 500;
                 service.Message = ex.Message;
             }
-
             return service;
-        }
-
-        private string GenerateToken(string email)
-        {
-            var jwtSettings = _configuration.GetSection("JwtSettings");
-
-            var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtSettings["SecretKey"])
-            );
-
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
-
-            var token = new JwtSecurityToken(
-                issuer: jwtSettings["Issuer"],
-                audience: jwtSettings["Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(
-                    Convert.ToDouble(jwtSettings["ExpiryMinutes"])
-                ),
-                signingCredentials: credentials
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

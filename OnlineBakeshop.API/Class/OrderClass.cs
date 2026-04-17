@@ -28,6 +28,10 @@ namespace OnlineBakeshop.API.Class
                 param.Add("@productId", order.ProductId);
                 param.Add("@quantity", order.Quantity);
                 param.Add("@totalPrice", order.TotalPrice);
+                param.Add("@deliveryDate", order.DeliveryDate);
+                param.Add("@deliveryTime", order.DeliveryTime);
+                param.Add("@deliveryAddress", order.DeliveryAddress);
+                param.Add("@specialNotes", order.SpecialNotes);
                 param.Add("@statementType", "CREATE");
 
                 conn.Execute(
@@ -46,7 +50,6 @@ namespace OnlineBakeshop.API.Class
             }
             return service;
         }
-
 
         public async Task<ServiceResponse<object>> GetAllOrders()
         {
@@ -115,6 +118,32 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
+        public async Task<ServiceResponse<object>> GetOrdersByUserId(int userId)
+        {
+            ServiceResponse<object> service = new ServiceResponse<object>();
+            try
+            {
+                var param = new DynamicParameters();
+                param.Add("@userId", userId);
+                param.Add("@statementType", "GETBYUSER");
+
+                var result = conn.Query(
+                    "SP_ONLINEBAKESHOPDB_ORDERS",
+                    param,
+                    commandType: CommandType.StoredProcedure
+                ).ToList();
+
+                service.Status = 200;
+                service.Data = result;
+            }
+            catch (Exception ex)
+            {
+                service.Status = 500;
+                service.Message = ex.Message;
+            }
+            return service;
+        }
+
         public async Task<ServiceResponse<object>> UpdateOrder(OrderModel order)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
@@ -167,7 +196,6 @@ namespace OnlineBakeshop.API.Class
             }
             return service;
         }
-
 
         public async Task<ServiceResponse<object>> DeleteOrder(int orderId)
         {

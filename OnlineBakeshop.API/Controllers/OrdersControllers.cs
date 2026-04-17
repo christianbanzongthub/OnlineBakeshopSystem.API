@@ -24,7 +24,6 @@ namespace OnlineBakeshop.API.Controllers
             var validation = await validationRepository.ValidateOrder(
                 order.UserId, order.ProductId, order.Quantity
             );
-
             if (validation.Data == null || !validation.Data.IsValid)
                 return BadRequest(new
                 {
@@ -49,6 +48,14 @@ namespace OnlineBakeshop.API.Controllers
         public async Task<IActionResult> GetOrderById(int orderId)
         {
             var response = await orderRepository.GetOrderById(orderId);
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Route("GetOrdersByUserId")]
+        public async Task<IActionResult> GetOrdersByUserId(int userId)
+        {
+            var response = await orderRepository.GetOrdersByUserId(userId);
             return Ok(response);
         }
 
