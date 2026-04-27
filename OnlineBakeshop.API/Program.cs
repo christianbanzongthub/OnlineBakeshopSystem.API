@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
 namespace OnlineBakeshop.API
 {
@@ -55,6 +57,9 @@ namespace OnlineBakeshop.API
             builder.Services.AddScoped<IProductRepository, ProductClass>();
             builder.Services.AddScoped<IRegisterRepository, RegisterClass>();
             builder.Services.AddScoped<ILoginRepository, LoginClass>();
+            builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
+            builder.Services.AddScoped<IDeviceRepository, DeviceClass>();
+            
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -94,6 +99,47 @@ namespace OnlineBakeshop.API
             });
 
             var app = builder.Build();
+            
+            // Firebase Admin initialization via GOOGLE_APPLICATION_CREDENTIALS
+            {
+                var credentialsPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
+
+                if (string.IsNullOrWhiteSpace(credentialsPath))
+                {
+                    app.Logger.LogError("Firebase not initialized: GOOGLE_APPLICATION_CREDENTIALS is not set.");
+                    throw new InvalidOperationException(
+                        "Missing GOOGLE_APPLICATION_CREDENTIALS environment variable.");
+                }
+
+                if (!Path.IsPathRooted(credentialsPath))
+                {
+                    credentialsPath = Path.GetFullPath(
+                        Path.Combine(app.Environment.ContentRootPath, credentialsPath));
+                }
+
+                if (!File.Exists(credentialsPath))
+                {
+                    app.Logger.LogError(
+                        "Firebase credentials file not found at: {CredentialsPath}",
+                        credentialsPath);
+                    throw new InvalidOperationException(
+                        $"Firebase credentials file not found: {credentialsPath}");
+                }
+
+                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialsPath);
+
+                if (FirebaseApp.DefaultInstance == null)
+                {
+                    FirebaseApp.Create(new AppOptions
+                    {
+                        Credential = GoogleCredential.GetApplicationDefault()
+                    });
+
+                    app.Logger.LogInformation(
+                        "Firebase Admin initialized successfully using: {CredentialsPath}",
+                        credentialsPath);
+                }
+            }
 
             if (app.Environment.IsDevelopment())
             {
