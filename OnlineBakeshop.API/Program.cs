@@ -1,4 +1,4 @@
-using OnlineBakeshop.API.Class;
+﻿using OnlineBakeshop.API.Class;
 using OnlineBakeshop.API.IRepository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -13,7 +13,6 @@ namespace OnlineBakeshop.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-         
             var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -35,7 +34,7 @@ namespace OnlineBakeshop.API
 
             builder.Services.AddAuthorization();
 
-            
+            // ✅ CORS POLICY
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", policy =>
@@ -45,6 +44,7 @@ namespace OnlineBakeshop.API
                           .AllowAnyMethod();
                 });
             });
+
             builder.Services.AddScoped<IAuthRepository, AuthClass>();
             builder.Services.AddScoped<ICustomOrderRepository, CustomOrderClass>();
             builder.Services.AddScoped<IUserRepository, UserClass>();
@@ -55,9 +55,10 @@ namespace OnlineBakeshop.API
             builder.Services.AddScoped<IProductRepository, ProductClass>();
             builder.Services.AddScoped<IRegisterRepository, RegisterClass>();
             builder.Services.AddScoped<ILoginRepository, LoginClass>();
-            builder.Services.AddControllers();
 
+            builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
+
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
@@ -94,19 +95,25 @@ namespace OnlineBakeshop.API
 
             var app = builder.Build();
 
-
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
 
-            app.UseStaticFiles();
             app.UseHttpsRedirection();
-            app.UseCors("AllowAll");          
-            app.UseAuthentication();          
+
+            // 🔥 IMPORTANT: CORS must come BEFORE StaticFiles
+            app.UseCors("AllowAll");
+
+            // ✅ This now includes CORS headers for images
+            app.UseStaticFiles();
+
+            app.UseAuthentication();
             app.UseAuthorization();
+
             app.MapControllers();
+
             app.Run();
         }
     }

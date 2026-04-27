@@ -6,9 +6,9 @@ namespace OnlineBakeshop.API.IRepository
     public interface IOrderRepository
     {
         Task<ServiceResponse<object>> CreateOrder(OrderModel order);
-        Task<ServiceResponse<object>> GetAllOrders();
-        Task<ServiceResponse<object>> GetOrderById(int orderId);
-        Task<ServiceResponse<object>> GetOrdersByUserId(int userId);
+        Task<ServiceResponse<List<OrderModel>>> GetAllOrders();
+        Task<ServiceResponse<List<OrderModel>>> GetOrdersByUserId(int userId);
+        Task<ServiceResponse<OrderModel>> GetOrderById(int orderId);
         Task<ServiceResponse<object>> UpdateOrder(OrderModel order);
         Task<ServiceResponse<object>> RejectOrder(int orderId);
         Task<ServiceResponse<object>> DeleteOrder(int orderId);

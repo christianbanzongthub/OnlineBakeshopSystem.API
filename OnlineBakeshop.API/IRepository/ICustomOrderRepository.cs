@@ -5,8 +5,8 @@ namespace OnlineBakeshop.API.IRepository
 {
     public interface ICustomOrderRepository
     {
-        Task<ServiceResponse<object>> GetAllCustomOrders();
-        Task<ServiceResponse<object>> GetCustomOrderById(int customOrderId);
+        Task<ServiceResponse<List<CustomOrderModel>>> GetAllCustomOrders();
+        Task<ServiceResponse<CustomOrderModel>> GetCustomOrderById(int customOrderId);
         Task<ServiceResponse<object>> CreateCustomOrder(CustomOrderModel order);
         Task<ServiceResponse<object>> UpdateStatus(int customOrderId, string orderStatus);
         Task<ServiceResponse<object>> MarkAsPaid(int customOrderId);

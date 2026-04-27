@@ -16,33 +16,22 @@ namespace OnlineBakeshop.API.Class
             conn = new SqlConnection(config["ConnectionStrings:OnlineBakeshopdb"]);
         }
 
-        // =============================================
-        // GET ALL CUSTOM ORDERS
-        // =============================================
-        public async Task<ServiceResponse<object>> GetAllCustomOrders()
+        public async Task<ServiceResponse<List<CustomOrderModel>>> GetAllCustomOrders()
         {
-            ServiceResponse<object> service = new ServiceResponse<object>();
+            ServiceResponse<List<CustomOrderModel>> service = new ServiceResponse<List<CustomOrderModel>>();
             try
             {
                 var param = new DynamicParameters();
                 param.Add("@statementType", "GETALL");
 
-                var result = conn.Query(
+                var result = (await conn.QueryAsync<CustomOrderModel>(
                     "SP_ONLINEBAKESHOPDB_CUSTOMORDERS",
                     param,
                     commandType: CommandType.StoredProcedure
-                ).ToList();
+                )).ToList();
 
-                if (result.Count > 0)
-                {
-                    service.Status = 200;
-                    service.Data = result;
-                }
-                else
-                {
-                    service.Status = 404;
-                    service.Message = "No Custom Orders Found";
-                }
+                service.Status = 200;
+                service.Data = result;
             }
             catch (Exception ex)
             {
@@ -52,19 +41,16 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        // =============================================
-        // GET CUSTOM ORDER BY ID
-        // =============================================
-        public async Task<ServiceResponse<object>> GetCustomOrderById(int customOrderId)
+        public async Task<ServiceResponse<CustomOrderModel>> GetCustomOrderById(int customOrderId)
         {
-            ServiceResponse<object> service = new ServiceResponse<object>();
+            ServiceResponse<CustomOrderModel> service = new ServiceResponse<CustomOrderModel>();
             try
             {
                 var param = new DynamicParameters();
                 param.Add("@customOrderId", customOrderId);
                 param.Add("@statementType", "GETBYID");
 
-                var result = conn.QueryFirstOrDefault(
+                var result = await conn.QueryFirstOrDefaultAsync<CustomOrderModel>(
                     "SP_ONLINEBAKESHOPDB_CUSTOMORDERS",
                     param,
                     commandType: CommandType.StoredProcedure
@@ -89,9 +75,6 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        // =============================================
-        // CREATE CUSTOM ORDER
-        // =============================================
         public async Task<ServiceResponse<object>> CreateCustomOrder(CustomOrderModel order)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
@@ -112,7 +95,7 @@ namespace OnlineBakeshop.API.Class
                 param.Add("@deliveryAddress", order.DeliveryAddress);
                 param.Add("@statementType", "CREATE");
 
-                conn.Execute(
+                await conn.ExecuteAsync(
                     "SP_ONLINEBAKESHOPDB_CUSTOMORDERS",
                     param,
                     commandType: CommandType.StoredProcedure
@@ -129,9 +112,6 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        // =============================================
-        // UPDATE STATUS
-        // =============================================
         public async Task<ServiceResponse<object>> UpdateStatus(int customOrderId, string orderStatus)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
@@ -142,7 +122,7 @@ namespace OnlineBakeshop.API.Class
                 param.Add("@orderStatus", orderStatus);
                 param.Add("@statementType", "UPDATESTATUS");
 
-                conn.Execute(
+                await conn.ExecuteAsync(
                     "SP_ONLINEBAKESHOPDB_CUSTOMORDERS",
                     param,
                     commandType: CommandType.StoredProcedure
@@ -159,9 +139,6 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        // =============================================
-        // MARK AS PAID
-        // =============================================
         public async Task<ServiceResponse<object>> MarkAsPaid(int customOrderId)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
@@ -171,7 +148,7 @@ namespace OnlineBakeshop.API.Class
                 param.Add("@customOrderId", customOrderId);
                 param.Add("@statementType", "MARKPAID");
 
-                conn.Execute(
+                await conn.ExecuteAsync(
                     "SP_ONLINEBAKESHOPDB_CUSTOMORDERS",
                     param,
                     commandType: CommandType.StoredProcedure
@@ -188,7 +165,6 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        
         public async Task<ServiceResponse<object>> RejectCustomOrder(int customOrderId)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
@@ -198,7 +174,7 @@ namespace OnlineBakeshop.API.Class
                 param.Add("@customOrderId", customOrderId);
                 param.Add("@statementType", "REJECT");
 
-                conn.Execute(
+                await conn.ExecuteAsync(
                     "SP_ONLINEBAKESHOPDB_CUSTOMORDERS",
                     param,
                     commandType: CommandType.StoredProcedure
@@ -215,7 +191,6 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-       
         public async Task<ServiceResponse<object>> DeleteCustomOrder(int customOrderId)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
@@ -225,7 +200,7 @@ namespace OnlineBakeshop.API.Class
                 param.Add("@customOrderId", customOrderId);
                 param.Add("@statementType", "DELETE");
 
-                conn.Execute(
+                await conn.ExecuteAsync(
                     "SP_ONLINEBAKESHOPDB_CUSTOMORDERS",
                     param,
                     commandType: CommandType.StoredProcedure
@@ -252,7 +227,7 @@ namespace OnlineBakeshop.API.Class
                 param.Add("@quotedPrice", quotedPrice);
                 param.Add("@statementType", "SETPRICE");
 
-                conn.Execute(
+                await conn.ExecuteAsync(
                     "SP_ONLINEBAKESHOPDB_CUSTOMORDERS",
                     param,
                     commandType: CommandType.StoredProcedure

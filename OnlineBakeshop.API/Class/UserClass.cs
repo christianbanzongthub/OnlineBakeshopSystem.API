@@ -125,6 +125,37 @@ namespace OnlineBakeshop.API.Class
         }
 
         // =============================================
+        // UPDATE PROFILE PICTURE
+        // =============================================
+        public async Task<ServiceResponse<object>> UpdateProfilePicture(int userId, string profilePictureUrl)
+        {
+            ServiceResponse<object> service = new ServiceResponse<object>();
+            try
+            {
+                var param = new DynamicParameters();
+                param.Add("@userId", userId);
+                param.Add("@profilePicture", profilePictureUrl);
+                param.Add("@statementType", "UPDATEPROFILEPIC");
+
+                conn.Execute(
+                    "SP_ONLINEBAKESHOPDB_USERS",
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                service.Status = 200;
+                service.Message = "Profile Picture Updated Successfully";
+                service.Data = new { imageUrl = profilePictureUrl };
+            }
+            catch (Exception ex)
+            {
+                service.Status = 500;
+                service.Message = ex.Message;
+            }
+            return service;
+        }
+
+        // =============================================
         // DELETE USER
         // =============================================
         public async Task<ServiceResponse<object>> DeleteUser(int userId)
