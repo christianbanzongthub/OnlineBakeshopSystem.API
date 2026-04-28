@@ -7,7 +7,7 @@ namespace OnlineBakeshop.API.Controllers
 {
     [ApiController]
     [Route("api/admin/notifications")]
-    [Authorize] // change to [Authorize(Roles = "Admin")] when role claims are ready
+    [Authorize(Roles = "admin")]
     public class AdminNotificationsController : ControllerBase
     {
         private readonly IPushNotificationService _pushNotificationService;
