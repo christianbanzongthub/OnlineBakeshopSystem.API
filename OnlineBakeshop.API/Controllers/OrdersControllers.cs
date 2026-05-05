@@ -10,11 +10,13 @@ namespace OnlineBakeshop.API.Controllers
     {
         IOrderRepository orderRepository;
         IValidationRepository validationRepository;
+        IWebHostEnvironment _env;
 
-        public OrdersController(IOrderRepository order, IValidationRepository validation)
+        public OrdersController(IOrderRepository order, IValidationRepository validation, IWebHostEnvironment env)
         {
             orderRepository = order;
             validationRepository = validation;
+            _env = env;
         }
 
         [HttpPost]
@@ -32,6 +34,43 @@ namespace OnlineBakeshop.API.Controllers
                 });
 
             var response = await orderRepository.CreateOrder(order);
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Route("UploadReceipt")]
+        public async Task<IActionResult> UploadReceipt(
+            [FromForm] int orderId,
+            [FromForm] IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return Ok(new { Status = 400, Message = "No file uploaded." });
+
+            string[] allowed = { ".jpg", ".jpeg", ".png", ".webp" };
+            string ext = Path.GetExtension(file.FileName).ToLower();
+            if (!allowed.Contains(ext))
+                return Ok(new { Status = 400, Message = "Only jpg, jpeg, png, webp allowed." });
+
+            string folder = Path.Combine(_env.WebRootPath, "images", "receipts");
+            if (!Directory.Exists(folder))
+                Directory.CreateDirectory(folder);
+
+            string fileName = $"receipt_{orderId}_{Guid.NewGuid()}{ext}";
+            string filePath = Path.Combine(folder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+                await file.CopyToAsync(stream);
+
+            string imageUrl = $"/images/receipts/{fileName}";
+            var response = await orderRepository.UpdateReceipt(orderId, imageUrl);
+            return Ok(new { Status = 200, Message = "Receipt uploaded.", ImageUrl = imageUrl });
+        }
+
+        [HttpPut]
+        [Route("ConfirmPayment")]
+        public async Task<IActionResult> ConfirmPayment(int orderId)
+        {
+            var response = await orderRepository.ConfirmPayment(orderId);
             return Ok(response);
         }
 
@@ -80,6 +119,15 @@ namespace OnlineBakeshop.API.Controllers
         public async Task<IActionResult> DeleteOrder(int orderId)
         {
             var response = await orderRepository.DeleteOrder(orderId);
+            return Ok(response);
+        }
+
+        // NEW
+        [HttpPut]
+        [Route("CancelOrder")]
+        public async Task<IActionResult> CancelOrder(int orderId)
+        {
+            var response = await orderRepository.CancelOrder(orderId);
             return Ok(response);
         }
     }

@@ -9,5 +9,6 @@
         public string ContactNo { get; set; }
         public string? ProfilePicture { get; set; }
         public DateTime DateCreated { get; set; }
+        public bool? IsArchived { get; set; }
     }
 }

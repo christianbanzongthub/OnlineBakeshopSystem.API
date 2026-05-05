@@ -147,5 +147,22 @@ namespace OnlineBakeshop.API.Controllers
 
             return Ok(result);
         }
+
+        [HttpPost("admin/send")]
+        [AllowAnonymous] // or keep [Authorize] if your admin token works
+        public async Task<IActionResult> AdminSend(
+        [FromBody] SendPushNotificationRequest request,
+        CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _pushNotificationService.SendToUsersAsync(request, cancellationToken);
+
+            if (result.Status >= 400)
+                return StatusCode(result.Status, result);
+
+            return Ok(result);
+        }
     }
 }

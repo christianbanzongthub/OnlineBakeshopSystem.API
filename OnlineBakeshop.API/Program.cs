@@ -30,13 +30,33 @@ namespace OnlineBakeshop.API
                     ValidAudience = jwtSettings["Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(jwtSettings["SecretKey"])
-                    )
+                    ),
+                    ClockSkew = TimeSpan.Zero
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        Console.WriteLine("❌ JWT Auth failed: " + context.Exception.Message);
+                        return Task.CompletedTask;
+                    },
+                    OnTokenValidated = context =>
+                    {
+                        Console.WriteLine("✅ JWT valid for: " + context.Principal?.Identity?.Name);
+                        return Task.CompletedTask;
+                    },
+                    OnChallenge = context =>
+                    {
+                        Console.WriteLine("⚠️ OnChallenge error: " + context.Error);
+                        Console.WriteLine("⚠️ OnChallenge description: " + context.ErrorDescription);
+                        return Task.CompletedTask;
+                    }
                 };
             });
 
             builder.Services.AddAuthorization();
 
-            // ✅ CORS POLICY
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", policy =>
@@ -47,6 +67,7 @@ namespace OnlineBakeshop.API
                 });
             });
 
+            builder.Services.AddScoped<ICartRepository, CartClass>();
             builder.Services.AddScoped<IAuthRepository, AuthClass>();
             builder.Services.AddScoped<ICustomOrderRepository, CustomOrderClass>();
             builder.Services.AddScoped<IUserRepository, UserClass>();
@@ -59,7 +80,6 @@ namespace OnlineBakeshop.API
             builder.Services.AddScoped<ILoginRepository, LoginClass>();
             builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
             builder.Services.AddScoped<IDeviceRepository, DeviceClass>();
-            
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -99,8 +119,7 @@ namespace OnlineBakeshop.API
             });
 
             var app = builder.Build();
-            
-            // Firebase Admin initialization via GOOGLE_APPLICATION_CREDENTIALS
+
             {
                 var credentialsPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
 
@@ -148,18 +167,11 @@ namespace OnlineBakeshop.API
             }
 
             app.UseHttpsRedirection();
-
-            // 🔥 IMPORTANT: CORS must come BEFORE StaticFiles
             app.UseCors("AllowAll");
-
-            // ✅ This now includes CORS headers for images
             app.UseStaticFiles();
-
             app.UseAuthentication();
             app.UseAuthorization();
-
             app.MapControllers();
-
             app.Run();
         }
     }

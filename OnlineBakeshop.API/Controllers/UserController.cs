@@ -77,6 +77,22 @@ namespace OnlineBakeshop.API.Controllers
             return Ok(new { Status = 200, Message = "Profile picture updated.", ImageUrl = imageUrl });
         }
 
+        [HttpPut]
+        [Route("ArchiveUser")]
+        public async Task<IActionResult> ArchiveUser(int userId)
+        {
+            var response = await userRepository.ArchiveUser(userId);
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Route("RestoreUser")]
+        public async Task<IActionResult> RestoreUser(int userId)
+        {
+            var response = await userRepository.RestoreUser(userId);
+            return Ok(response);
+        }
+
         [HttpDelete]
         [Route("DeleteUser")]
         public async Task<IActionResult> DeleteUser(int userId)

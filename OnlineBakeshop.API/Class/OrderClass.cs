@@ -32,16 +32,21 @@ namespace OnlineBakeshop.API.Class
                 param.Add("@deliveryTime", order.DeliveryTime);
                 param.Add("@deliveryAddress", order.DeliveryAddress);
                 param.Add("@specialNotes", order.SpecialNotes);
+                param.Add("@paymentMethod", order.PaymentMethod);
+                param.Add("@fulfillmentType", order.FulfillmentType);
+                param.Add("@meetupPlace", order.MeetupPlace);
                 param.Add("@statementType", "CREATE");
 
-                await conn.ExecuteAsync(
+                var result = await conn.QueryFirstOrDefaultAsync<dynamic>(
                     "SP_ONLINEBAKESHOPDB_ORDERS",
                     param,
-                    commandType: CommandType.StoredProcedure
-                );
+                    commandType: CommandType.StoredProcedure);
+
+                int newOrderId = (int)(result?.orderId ?? 0);
 
                 service.Status = 200;
                 service.Message = "Order Created Successfully";
+                service.Data = new { orderId = newOrderId };
             }
             catch (Exception ex)
             {
@@ -163,6 +168,59 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
+        public async Task<ServiceResponse<object>> UpdateReceipt(int orderId, string receiptImagePath)
+        {
+            ServiceResponse<object> service = new ServiceResponse<object>();
+            try
+            {
+                var param = new DynamicParameters();
+                param.Add("@orderId", orderId);
+                param.Add("@receiptImage", receiptImagePath);
+                param.Add("@statementType", "UPDATERECEIPT");
+
+                await conn.ExecuteAsync(
+                    "SP_ONLINEBAKESHOPDB_ORDERS",
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                service.Status = 200;
+                service.Message = "Receipt Updated Successfully";
+            }
+            catch (Exception ex)
+            {
+                service.Status = 500;
+                service.Message = ex.Message;
+            }
+            return service;
+        }
+
+        public async Task<ServiceResponse<object>> ConfirmPayment(int orderId)
+        {
+            ServiceResponse<object> service = new ServiceResponse<object>();
+            try
+            {
+                var param = new DynamicParameters();
+                param.Add("@orderId", orderId);
+                param.Add("@statementType", "CONFIRMPAYMENT");
+
+                await conn.ExecuteAsync(
+                    "SP_ONLINEBAKESHOPDB_ORDERS",
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                service.Status = 200;
+                service.Message = "Payment Confirmed Successfully";
+            }
+            catch (Exception ex)
+            {
+                service.Status = 500;
+                service.Message = ex.Message;
+            }
+            return service;
+        }
+
         public async Task<ServiceResponse<object>> RejectOrder(int orderId)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
@@ -206,6 +264,33 @@ namespace OnlineBakeshop.API.Class
 
                 service.Status = 200;
                 service.Message = "Order Deleted Successfully";
+            }
+            catch (Exception ex)
+            {
+                service.Status = 500;
+                service.Message = ex.Message;
+            }
+            return service;
+        }
+
+        // NEW
+        public async Task<ServiceResponse<object>> CancelOrder(int orderId)
+        {
+            ServiceResponse<object> service = new ServiceResponse<object>();
+            try
+            {
+                var param = new DynamicParameters();
+                param.Add("@orderId", orderId);
+                param.Add("@statementType", "CANCEL");
+
+                await conn.ExecuteAsync(
+                    "SP_ONLINEBAKESHOPDB_ORDERS",
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                service.Status = 200;
+                service.Message = "Order Cancelled Successfully";
             }
             catch (Exception ex)
             {

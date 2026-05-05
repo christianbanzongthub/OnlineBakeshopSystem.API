@@ -22,15 +22,11 @@ namespace OnlineBakeshop.API.Class
             conn = new SqlConnection(config["ConnectionStrings:OnlineBakeshopdb"]);
         }
 
-        // =============================================
-        // REFRESH TOKEN — get new JWT using refresh token
-        // =============================================
         public async Task<ServiceResponse<object>> RefreshToken(string refreshToken)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
             try
             {
-                // Step 1: Find the refresh token in DB
                 var param = new DynamicParameters();
                 param.Add("@refreshToken", refreshToken);
                 param.Add("@statementType", "GETBYTOKEN");
@@ -41,7 +37,6 @@ namespace OnlineBakeshop.API.Class
                     commandType: CommandType.StoredProcedure
                 );
 
-                // Step 2: Validate — must exist, not revoked, not expired
                 if (result == null)
                 {
                     service.Status = 401;
@@ -63,7 +58,6 @@ namespace OnlineBakeshop.API.Class
                     return service;
                 }
 
-                // Step 3: Revoke old refresh token
                 var revokeParam = new DynamicParameters();
                 revokeParam.Add("@refreshToken", refreshToken);
                 revokeParam.Add("@statementType", "REVOKE");
@@ -74,15 +68,15 @@ namespace OnlineBakeshop.API.Class
                     commandType: CommandType.StoredProcedure
                 );
 
-                // Step 4: Generate new JWT and new Refresh Token
+                // FIX: pass userId when regenerating token on refresh
                 string email = result.email;
+                int userId = (int)result.userId;
 
-                string newJwtToken = GenerateToken(email);
+                string newJwtToken = GenerateToken(email, userId);
                 string newRefreshToken = GenerateRefreshToken();
 
-                // Step 5: Save new refresh token to DB
                 var saveParam = new DynamicParameters();
-                saveParam.Add("@userId", result.userId);
+                saveParam.Add("@userId", userId);
                 saveParam.Add("@email", email);
                 saveParam.Add("@refreshToken", newRefreshToken);
                 saveParam.Add("@expiryDate", DateTime.Now.AddDays(
@@ -109,9 +103,6 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        // =============================================
-        // REVOKE TOKEN — logout / invalidate refresh token
-        // =============================================
         public async Task<ServiceResponse<object>> RevokeToken(string refreshToken)
         {
             ServiceResponse<object> service = new ServiceResponse<object>();
@@ -138,10 +129,8 @@ namespace OnlineBakeshop.API.Class
             return service;
         }
 
-        // =============================================
-        // GENERATE JWT TOKEN (email only, no role)
-        // =============================================
-        public string GenerateToken(string email)
+        //  FIX: Added userId parameter so it gets embedded in the JWT
+        public string GenerateToken(string email, int userId)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");
             var key = new SymmetricSecurityKey(
@@ -153,7 +142,8 @@ namespace OnlineBakeshop.API.Class
             {
                 new Claim(JwtRegisteredClaimNames.Sub, email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.Email, email)
+                new Claim(ClaimTypes.Email, email),
+                new Claim("userId", userId.ToString())   //  THIS IS THE KEY FIX
             };
 
             var token = new JwtSecurityToken(
@@ -169,15 +159,16 @@ namespace OnlineBakeshop.API.Class
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        // =============================================
-        // GENERATE REFRESH TOKEN (random secure string)
-        // =============================================
         public string GenerateRefreshToken()
         {
             var randomBytes = new byte[64];
             using var rng = RandomNumberGenerator.Create();
             rng.GetBytes(randomBytes);
-            return Convert.ToBase64String(randomBytes);
+            // ✅ URL-safe: replaces +, /, = so token survives HTTP transport
+            return Convert.ToBase64String(randomBytes)
+                .Replace("+", "-")
+                .Replace("/", "_")
+                .Replace("=", "");
         }
     }
 }

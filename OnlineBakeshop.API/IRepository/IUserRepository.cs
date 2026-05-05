@@ -10,5 +10,7 @@ namespace OnlineBakeshop.API.IRepository
         Task<ServiceResponse<object>> UpdateUser(UserModel user);
         Task<ServiceResponse<object>> UpdateProfilePicture(int userId, string profilePictureUrl);
         Task<ServiceResponse<object>> DeleteUser(int userId);
+        Task<ServiceResponse<object>> ArchiveUser(int userId);
+        Task<ServiceResponse<object>> RestoreUser(int userId);
     }
 }

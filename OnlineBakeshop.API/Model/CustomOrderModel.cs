@@ -19,8 +19,11 @@
         public string? OrderStatus { get; set; }
         public decimal? QuotedPrice { get; set; }
         public DateTime DateOrdered { get; set; }
-
-        // Joined from tbl_bakeshop_users
+        public string? PaymentMethod { get; set; }
+        public string? ReceiptImage { get; set; }
+        public string? FulfillmentType { get; set; }
+        public string? MeetupPlace { get; set; }
+        // Joined
         public string? FullName { get; set; }
         public string? Email { get; set; }
         public string? ContactNo { get; set; }

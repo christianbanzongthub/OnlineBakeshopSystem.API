@@ -183,5 +183,63 @@ namespace OnlineBakeshop.API.Class
             }
             return service;
         }
+
+        // =============================================
+        // ARCHIVE USER
+        // =============================================
+        public async Task<ServiceResponse<object>> ArchiveUser(int userId)
+        {
+            ServiceResponse<object> service = new ServiceResponse<object>();
+            try
+            {
+                var param = new DynamicParameters();
+                param.Add("@userId", userId);
+                param.Add("@statementType", "ARCHIVE");
+
+                conn.Execute(
+                    "SP_ONLINEBAKESHOPDB_USERS",
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                service.Status = 200;
+                service.Message = "User Archived Successfully";
+            }
+            catch (Exception ex)
+            {
+                service.Status = 500;
+                service.Message = ex.Message;
+            }
+            return service;
+        }
+
+        // =============================================
+        // RESTORE USER
+        // =============================================
+        public async Task<ServiceResponse<object>> RestoreUser(int userId)
+        {
+            ServiceResponse<object> service = new ServiceResponse<object>();
+            try
+            {
+                var param = new DynamicParameters();
+                param.Add("@userId", userId);
+                param.Add("@statementType", "RESTORE");
+
+                conn.Execute(
+                    "SP_ONLINEBAKESHOPDB_USERS",
+                    param,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                service.Status = 200;
+                service.Message = "User Restored Successfully";
+            }
+            catch (Exception ex)
+            {
+                service.Status = 500;
+                service.Message = ex.Message;
+            }
+            return service;
+        }
     }
 }

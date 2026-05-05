@@ -4,10 +4,6 @@ using OnlineBakeshop.API.IRepository;
 using OnlineBakeshop.API.Model;
 using System.Data;
 using System.Data.SqlClient;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
 namespace OnlineBakeshop.API.Class
 {
@@ -40,7 +36,6 @@ namespace OnlineBakeshop.API.Class
 
                 if (result != null)
                 {
-                    // Step 1: Verify password
                     string hashedPassword = result.password;
                     bool isPasswordValid = BCrypt.Net.BCrypt.Verify(password, hashedPassword);
 
@@ -51,15 +46,13 @@ namespace OnlineBakeshop.API.Class
                         return service;
                     }
 
-                    // Step 2: Generate JWT
-                    string token = _authClass.GenerateToken(email);
-
-                    // Step 3: Generate Refresh Token
+                    // ✅ FIX: pass userId so it gets embedded inside the JWT
+                    int userId = (int)result.userId;
+                    string token = _authClass.GenerateToken(email, userId);
                     string refreshToken = _authClass.GenerateRefreshToken();
 
-                    // Step 4: Save refresh token to DB
                     var rtParam = new DynamicParameters();
-                    rtParam.Add("@userId", result.userId);
+                    rtParam.Add("@userId", userId);
                     rtParam.Add("@email", email);
                     rtParam.Add("@refreshToken", refreshToken);
                     rtParam.Add("@expiryDate", DateTime.Now.AddDays(
